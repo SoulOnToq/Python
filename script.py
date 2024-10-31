@@ -22,7 +22,6 @@ import numpy as np
 import getpass
 import tkinter as tk
 import json
-import browser_cookie3
 import re
 
 
